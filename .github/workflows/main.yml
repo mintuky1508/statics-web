@@ -15,7 +15,7 @@ jobs:
 
     - name: Setup SSH key
       run: |
-        echo "${{ secrets.GCP_SSH_KEY }}" > racit.pem
+        echo "${{ secrets.GCP_SSH_KEY }}" > rachit.pem
         chmod 600 rachit.pem
 
     - name: Deploy to AWS VM via SCP
