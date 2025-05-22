@@ -1,20 +1,28 @@
+name: Deploy Static Website to ec2
+
+on:
+  push:
+    branches:
+      - master  # or any branch you want
+
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Setup SSH key
       run: |
         echo "${{ secrets.GCP_SSH_KEY }}" > rachit.pem
         chmod 600 rachit.pem
 
-    - name: Clean remote /var/www/html
+    - name: Clean remote directory
       run: |
         ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo rm -rf /var/www/html/*"
 
-    - name: Deploy static site files
+    - name: Copy static files to EC2
       run: |
         scp -i rachit.pem -o StrictHostKeyChecking=no -r ./* ubuntu@44.204.181.185:/var/www/html/
 
