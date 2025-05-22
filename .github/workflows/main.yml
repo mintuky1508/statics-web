@@ -3,7 +3,7 @@ name: Deploy Static Website to ec2
 on:
   push:
     branches:
-      - master  # or any branch you want
+      - master
 
 jobs:
   deploy:
@@ -18,13 +18,14 @@ jobs:
         echo "${{ secrets.GCP_SSH_KEY }}" > rachit.pem
         chmod 600 rachit.pem
 
-    - name: Clean remote directory
+    - name: Copy files to EC2 temp folder
       run: |
-        ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo rm -rf /var/www/html/*"
+        ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "mkdir -p /home/ubuntu/tmp-site"
+        scp -i rachit.pem -o StrictHostKeyChecking=no -r ./* ubuntu@44.204.181.185:/home/ubuntu/tmp-site/
 
-    - name: Copy static files to EC2
+    - name: Move files to /var/www/html
       run: |
-        scp -i rachit.pem -o StrictHostKeyChecking=no -r ./* ubuntu@44.204.181.185:/var/www/html/
+        ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo rm -rf /var/www/html/* && sudo mv /home/ubuntu/tmp-site/* /var/www/html/"
 
     - name: Restart nginx
       run: |
