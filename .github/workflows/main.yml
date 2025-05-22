@@ -1,4 +1,4 @@
-name: Deploy Static Website to GCP VM
+name: Deploy Static Website to ec2
 
 on:
   push:
@@ -15,13 +15,13 @@ jobs:
 
     - name: Setup SSH key
       run: |
-        echo "${{ secrets.GCP_SSH_KEY }}" > gcp-key.pem
-        chmod 600 gcp-key.pem
+        echo "${{ secrets.GCP_SSH_KEY }}" > racit.pem
+        chmod 600 rachit.pem
 
-    - name: Deploy to GCP VM via SCP
+    - name: Deploy to AWS VM via SCP
       run: |
-        scp -i gcp-key.pem -o StrictHostKeyChecking=no -r ./public/* ubuntu@44.204.181.185:/var/www/html/
+        scp -i rachit.pem -o StrictHostKeyChecking=no -r ./public/* ubuntu@44.204.181.185:/var/www/html/
 
     - name: Restart Nginx
       run: |
-        ssh -i gcp-key.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo systemctl restart nginx"
+        ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo systemctl restart nginx"
