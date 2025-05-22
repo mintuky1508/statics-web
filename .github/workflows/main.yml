@@ -1,0 +1,27 @@
+name: Deploy Static Website to GCP VM
+
+on:
+  push:
+    branches:
+      - main  # or your working branch
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # Important for using your self-hosted runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup SSH key
+      run: |
+        echo "${{ secrets.GCP_SSH_KEY }}" > gcp-key.pem
+        chmod 600 gcp-key.pem
+
+    - name: Deploy to GCP VM via SCP
+      run: |
+        scp -i gcp-key.pem -o StrictHostKeyChecking=no -r ./public/* ubuntu@44.204.181.185:/var/www/html/
+
+    - name: Restart Nginx
+      run: |
+        ssh -i gcp-key.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo systemctl restart nginx"
