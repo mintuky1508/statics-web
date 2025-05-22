@@ -3,7 +3,7 @@ name: Deploy Static Website to GCP VM
 on:
   push:
     branches:
-      - main  # or your working branch
+      - master  # or your working branch
 
 jobs:
   deploy:
