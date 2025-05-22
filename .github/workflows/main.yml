@@ -1,27 +1,23 @@
-name: Deploy Static Website to ec2
-
-on:
-  push:
-    branches:
-      - master  # or your working branch
-
 jobs:
   deploy:
-    runs-on: self-hosted  # Important for using your self-hosted runner
+    runs-on: self-hosted
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Setup SSH key
       run: |
         echo "${{ secrets.GCP_SSH_KEY }}" > rachit.pem
         chmod 600 rachit.pem
 
-    - name: Deploy to AWS VM via SCP
+    - name: Clean remote /var/www/html
       run: |
-        scp -i rachit.pem -o StrictHostKeyChecking=no -r ./public/* ubuntu@44.204.181.185:/var/www/html/
+        ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo rm -rf /var/www/html/*"
 
-    - name: Restart Nginx
+    - name: Deploy static site files
+      run: |
+        scp -i rachit.pem -o StrictHostKeyChecking=no -r ./* ubuntu@44.204.181.185:/var/www/html/
+
+    - name: Restart nginx
       run: |
         ssh -i rachit.pem -o StrictHostKeyChecking=no ubuntu@44.204.181.185 "sudo systemctl restart nginx"
